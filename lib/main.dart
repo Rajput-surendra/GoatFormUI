@@ -56,7 +56,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Madhu Farm",
+      title: "Goat Farm",
       locale: _locale,
       supportedLocales: [
         Locale("en", "US"),
