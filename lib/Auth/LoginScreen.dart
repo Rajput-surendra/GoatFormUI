@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:madhu_farma/ApiPath/Api.dart';
 import 'package:madhu_farma/Helper/session.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
+import '../Screens/HomeScreen.dart';
 import 'SignUpScreen.dart';
 import '../Helper/AppBtn.dart';
 import '../Utils/colors.dart';
+import '../ApiPath/apiBasehelper.dart';
+
 import '../Screens/MadhuFarmScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -19,6 +24,47 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool isCheck = false;
   final _formKey = GlobalKey<FormState>();
+  bool isLoading=false;
+  TextEditingController mobileController =  TextEditingController();
+  TextEditingController passwordController =  TextEditingController();
+
+
+
+  Future<void> login() async {
+    setState(() {
+      isLoading = true;
+    });
+    var parameter = {
+      "mobile":mobileController.text,
+      "password":passwordController.text,
+
+    };
+    print('____parameter______${parameter}_________');
+
+    apiBaseHelper.postAPICall(Uri.parse(ApiService.login), parameter).then((getData) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool error = getData['error'];
+      String uId =  getData['data'][0]['id'];
+      String uName =  getData['data'][0]['username'];
+      String uMobile =  getData['data'][0]['mobile'];
+      String uImage =  getData['data'][0]['image'];
+
+      if (error ==  false) {
+        prefs.setString('userId', uId);
+        prefs.setString('username', uName);
+        prefs.setString('mobile', uMobile);
+        prefs.setString('image', uImage);
+        setState(() {
+          Fluttertoast.showToast(msg: "${getData['message']}");
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+        });
+
+      }
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,14 +128,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(getTranslated(context, "WELCOME_TO"),
                         style: TextStyle(
-                          color: Color(0xff002E77),
+                          color: colors.primary,
                           fontSize: 20,
                           fontWeight: FontWeight.bold
                         ),),
                         SizedBox(height: 5,),
                         Text(getTranslated(context, "MADHU_FARM"),
                           style: TextStyle(
-                              color: Color(0xff002E77),
+                              color: colors.primary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold
                           ),),
@@ -115,13 +161,14 @@ class _LoginScreenState extends State<LoginScreen> {
                              mainAxisAlignment: MainAxisAlignment.center,
                              children: [
                                TextFormField(
+                                 controller:mobileController ,
                                  keyboardType: TextInputType.number,
                                  inputFormatters: [
                                    LengthLimitingTextInputFormatter(10),
                                  ],
                                  validator: (value) {
                                    if (value!.isEmpty) {
-                                     return 'Mobile nO is required';
+                                     return 'Mobile no is required';
                                    }else if(value.length<9){
                                      return 'Mobile should have aleast 10 characters';
                                    }
@@ -138,6 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                ),
                                SizedBox(height: 20,),
                                TextFormField(
+                                 controller: passwordController,
                                  obscureText: true,
                                  keyboardType: TextInputType.visiblePassword,
                                  validator: (value) {
@@ -190,7 +238,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                  onPress: (){
                                    if(_formKey.currentState!.validate()){
                                      if(isCheck == true){
-                                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MadhuFarmScreen())) ;
+                                     login();
+                                       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MadhuFarmScreen())) ;
                                      }else{
                                        Fluttertoast.showToast(msg: "Select remember",backgroundColor: colors.secondary);
                                      }
@@ -209,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                  children: [
                                    Text(getTranslated(context, "DONT'T_HAVE_AN_ACCOUNT"),
                                    style: TextStyle(
-                                     fontSize: 12,color: colors.black54
+                                     fontSize: 14,color: colors.black54
                                    ),),
                                    GestureDetector(
                                      onTap: (){
@@ -217,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                      },
                                      child: Text(getTranslated(context, "SIGN_UP"),textAlign: TextAlign.center,
                                        style: TextStyle(
-                                           fontSize: 12,
+                                           fontSize: 15,
                                          color: colors.secondary,fontWeight: FontWeight.bold,
                                        ),),
                                    ),

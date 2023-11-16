@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:madhu_farma/Auth/LoginScreen.dart';
 import 'package:madhu_farma/Medicine/MedicineRecord.dart';
+import 'package:madhu_farma/Model/user_module_response.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../ApiPath/Api.dart';
 import '../Helper/CustomCard.dart';
 import '../Helper/CustomDialogPopup.dart';
 import '../Helper/session.dart';
@@ -97,7 +101,58 @@ class _HomePageState extends State<HomePage> {
       ];
     });
     super.initState();
-    //  getProfile();
+   // getProfile();
+    getDataProfile();
+
+  }
+  String? userId ;
+  String? uName  ;
+  String? uMobile  ;
+  String? uImage  ;
+  String? purchase;
+List<String> moduleList = [];
+  getDataProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+     userId  =  prefs.getString('userId');
+     uName  =  prefs.getString('username');
+     uMobile  =  prefs.getString('mobile');
+     uImage  =  prefs.getString('image');
+     setState(() {
+
+     });
+
+    userPermission();
+  }
+
+  List <UserModuleData> userModuleDataList = [] ;
+  userPermission() async {
+    var parameter = {
+      "user_id":userId.toString(),
+    };
+    apiBaseHelper.postAPICall(Uri.parse(ApiService.userPermission), parameter).then((getData) async {
+      bool error = getData['error'];
+      //purchase =  getData['data'][0]['module'];
+
+      if (error ==  false) {
+
+        userModuleDataList = (getData['data'] as List).map((e) => UserModuleData.fromJson(e)).toList() ;
+        for(int i=0; i<userModuleDataList.length; i++){
+          moduleList.add(userModuleDataList[i].module ?? '') ;
+        }
+
+
+        // String Status =  getData['data'][0]['Status'];
+        // String Breead =  getData['data'][0]['Breead'];
+        // String Animals =  getData['data'][0]['Animals'];
+
+        // setState(() {
+        //   Fluttertoast.showToast(msg: "${getData['message']}");
+        //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+        // });
+
+      }
+
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -144,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Johan Deo",
+                                    "$uName",
                                     style: TextStyle(
                                         color: colors.blackTemp,
                                         fontSize: 17,
@@ -158,9 +213,9 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                               Text(
-                                "Mobile No. 7770050513",
+                                "Mobile No: $uMobile",
                                 style: TextStyle(
-                                    fontSize: 11, color: colors.blackTemp),
+                                    fontSize: 11, color: colors.blackTemp,fontWeight: FontWeight.bold),
                               ),
                               SizedBox(
                                 height: 20,
@@ -171,30 +226,30 @@ class _HomePageState extends State<HomePage> {
                                   physics: BouncingScrollPhysics(),
                                   child: Column(
                                     children: [
-                                      InkWell(onTap: (){
+                                      moduleList.contains('Purchase') ? InkWell(onTap: (){
                                         Navigator.push(context, MaterialPageRoute(builder: (context)=>PurchaseRecord()));
                                       },
                                         child: CustomCard(
                                           title: getTranslated(context, "PURCHASE"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ) : SizedBox.shrink(),
+                                      moduleList.contains('Status') ? InkWell(
                                         onTap: () {
                                           Navigator.push(context, MaterialPageRoute(builder: (context)=>StatusScreen()));
                                         },
                                         child: CustomCard(
                                           title: getTranslated(context, "STATUS"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Breead') ?  InkWell(
                                         onTap: () {
                                           Navigator.push(context, MaterialPageRoute(builder: (context)=>BreedScreen()));
                                         },
                                         child: CustomCard(
                                           title: getTranslated(context, "BREED"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Animals') ?    InkWell(
                                         onTap: () {
                                           Navigator.push(
                                               context,
@@ -205,8 +260,8 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "ANIMALS"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Weight') ?  InkWell(
                                         onTap: () {
                                           Navigator.push(
                                               context,
@@ -217,18 +272,18 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "WEIGHT"),
                                         ),
-                                      ),
+                                      ):SizedBox.shrink(),
 
-                                      InkWell(onTap: (){
+                                      moduleList.contains('Supplement') ?   InkWell(onTap: (){
                                         _showBottomSheet(context);
                                       },
                                         child: CustomCard(
                                           title: getTranslated(context, "SUPPLEMENT"),
                                           icon: Icons.arrow_forward_ios_rounded,
                                         ),
-                                      ),
+                                      ):SizedBox.shrink(),
 
-                                      InkWell(
+                                      moduleList.contains('Medicine') ?  InkWell(
                                         onTap: () {
                                           _showBottomSheet2(context);
                                         },
@@ -236,16 +291,16 @@ class _HomePageState extends State<HomePage> {
                                           title: getTranslated(context, "MEDICINE"),
                                           icon: Icons.arrow_forward_ios_rounded,
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                    moduleList.contains('Mattings') ? InkWell(
                                         onTap: (){
                                           Navigator.push(context, MaterialPageRoute(builder: (context)=>MatingRecord()));
                                         },
                                         child: CustomCard(
                                           title: getTranslated(context, "MATINGS"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Breeding') ?  InkWell(
                                         onTap: () {
                                           Navigator.push(
                                               context,
@@ -256,8 +311,8 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "BREEDING"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Milk') ?  InkWell(
                                         onTap: (){
                                           Navigator.push(
                                               context,
@@ -268,8 +323,8 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "MILK"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Death') ? InkWell(
                                         onTap: (){
                                           Navigator.push(
                                               context,
@@ -280,8 +335,8 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "DEATH"),
                                         ),
-                                      ),
-                                      GestureDetector(
+                                      ):SizedBox.shrink(),
+                                    moduleList.contains('Sales') ? GestureDetector(
                                         onTap: (){
                                           Navigator.push(
                                               context,
@@ -292,8 +347,8 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "SALE"),
                                         ),
-                                      ),
-                                      InkWell(
+                                      ):SizedBox.shrink(),
+                                      moduleList.contains('Report') ?   InkWell(
                                         onTap: () {
                                           Navigator.push(
                                               context,
@@ -304,7 +359,7 @@ class _HomePageState extends State<HomePage> {
                                         child: CustomCard(
                                           title: getTranslated(context, "REPORT"),
                                         ),
-                                      ),
+                                      ):SizedBox.shrink(),
                                       InkWell(
                                         onTap: () {
                                           _showBottomSheet3(context);
@@ -363,7 +418,37 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       InkWell(
                                         onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              String contentText = "LogOut";
+                                              return StatefulBuilder(
+                                                builder: (context, setState) {
+                                                  return AlertDialog(
+                                                    title: Text("Are you sure you want  to ? LogOut"),
+                                                    content: Text(contentText),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context),
+                                                        child: Text("Cancel"),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          setState(() async {
+                                                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                            prefs.clear();
+                                                            Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
 
+                                                          });
+                                                        },
+                                                        child: Text("Logout"),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          );
                                         },
                                         child: CustomCard(
                                           title: getTranslated(context, "LOG_OUT"),
@@ -393,24 +478,24 @@ class _HomePageState extends State<HomePage> {
 
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                      child: Image.asset("assets/images/1.png")),
+                      child: Image.network("$uImage")),
                   radius: 50,
                   backgroundColor: colors.black54,
                 ),
               ),
-              Positioned(
-                width: size.width / 5.2,
-                height: size.height / 13,
-                top: 67,
-                child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      Icons.arrow_back_ios_new,
-                      size: 22,
-                    )),
-              ),
+              // Positioned(
+              //   width: size.width / 5.2,
+              //   height: size.height / 13,
+              //   top: 67,
+              //   child: InkWell(
+              //       onTap: () {
+              //         Navigator.pop(context);
+              //       },
+              //       child: Icon(
+              //         Icons.arrow_back_ios_new,
+              //         size: 22,
+              //       )),
+              // ),
             ],
           ),
         ),

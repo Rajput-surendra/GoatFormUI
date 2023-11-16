@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:madhu_farma/Splash/SplashScreen.dart';
-import 'Screens/19_Screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Helper/contrylocalization.dart';
 import 'Helper/demo_localization.dart';

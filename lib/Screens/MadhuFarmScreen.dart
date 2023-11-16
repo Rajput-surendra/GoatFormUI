@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:madhu_farma/Helper/session.dart';
 
 
+import '../ApiPath/Api.dart';
+import '../Model/animal_cat_model_response.dart';
 import '../Utils/Colors.dart';
 import 'HomeScreen.dart';
 import 'PunchIn.dart';
@@ -21,7 +23,42 @@ class _MadhuFarmScreenState extends State<MadhuFarmScreen> {
 
   final TextEditingController _chargeController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    animalCatApi();
+  }
+  AnimalCatResponse? animalCatResponse;
+  Future<void> animalCatApi() async {
+    apiBaseHelper.getAPICall(Uri.parse(ApiService.animalCategory)).then((getData) {
+      bool error = getData ['error'];
+      if(!error){
+        animalCatResponse = AnimalCatResponse.fromJson(getData);
+      }else {
 
+      }
+
+    });
+
+  }
+  Future<void> animalCountApi(String? catId) async {
+
+    var parameter = {
+      "animal_type":catId,
+
+    };
+
+    apiBaseHelper.postAPICall(Uri.parse(ApiService.register), parameter).then((getData) {
+      bool error = getData['error'];
+      if (error ==  false) {
+        animalCatResponse = AnimalCatResponse.fromJson(getData);
+      }
+
+    });
+  }
+  String? animalCat ,catId;
+  int? selectedSateIndex;
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -86,81 +123,76 @@ class _MadhuFarmScreenState extends State<MadhuFarmScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
-                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   elevation: 3,
-                  child:  Container(
-                    // width: MediaQuery.of(context).size.width/2.67,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2<String>(
+                        hint: const Text('Select Farm',
+                          style: TextStyle(
+                              color: colors.black54,fontWeight: FontWeight.w500,fontSize:15
+                          ),),
+                        // dropdownColor: colors.primary,
+                        value: animalCat,
+                        icon:  const Padding(
+                          padding: EdgeInsets.only(left:10.0),
+                          child: Icon(Icons.keyboard_arrow_down_rounded,  color:colors.secondary,size: 30,),
+                        ),
+                        // elevation: 16,
+                        style:  const TextStyle(color: colors.secondary,fontWeight: FontWeight.bold),
+                        underline: Padding(
+                          padding: const EdgeInsets.only(left: 0,right: 0),
+                          child: Container(
+                            // height: 2,
+                            color:  colors.whiteTemp,
+                          ),
+                        ),
+                        onChanged: (String? value) {
+                          // This is called when the user selects an item.
+                          setState(() {
+                            animalCat = value!;
+
+                            animalCatResponse?.data?.forEach((element) {
+                              if(element.name == value){
+                                selectedSateIndex = animalCatResponse?.data?.indexOf(element);
+                                catId = element.id;
+                               // getCityApi(catId!);
+
+                              }
+                            });
+                          });
+                        },
+                        items: animalCatResponse?.data?.map((items) {
+                          return DropdownMenuItem(
+                            value: items.name.toString(),
+                            child:  Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Container(
+                                      width: MediaQuery.of(context).size.width/1.42,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 0),
+                                        child: Text(items.name.toString(),overflow:TextOverflow.ellipsis,style: const TextStyle(color:colors.black54),),
+                                      )),
+                                ),
+
+                              ],
+                            ),
+                          );
+                        })
+                    .toList(),
+                   ),
+
                     ),
-                    child: DropdownButton2<String>(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: Icon(Icons.keyboard_arrow_down_outlined,size: 30,color: colors.secondary,),
-                      ),
-                      isExpanded: true,
-                      value:_selectedOption,
-                      style: TextStyle(color: colors.secondary),
-
-                      items: <String>['Goat', 'Standard', 'Premium'].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-
-                      hint: Text(
-                        "Select Farm",style: TextStyle(color: colors.secondary),
-                      ),
-                      onChanged: (String? value)  {
-                        setState(() {
-                          _selectedOption = value;
-                        });
-                      },
-
-                      underline: Container(  // Use a container with zero height to remove the underline
-                        height: 0,
-                        color: Colors.transparent,
-                      ),
-                    ),
-
-
-                  )
-
-                  // Container(
-                  //
-                  //   width: MediaQuery.of(context).size.width,
-                  //   padding: EdgeInsets.symmetric(horizontal: 10),
-                  //   decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(5)),
-                  //   child: DropdownButton<String>(
-                  //     hint: Text("Select Farm"),
-                  //     isExpanded: true,
-                  //     alignment: Alignment.center,
-                  //     value: _selectedOption,
-                  //     style: TextStyle(
-                  //         fontSize: 18,
-                  //         fontWeight: FontWeight.bold,
-                  //         color: Colors.black),
-                  //     underline: Container(),
-                  //     // hint: Text(
-                  //     //   'Goat',
-                  //     //   textAlign: TextAlign.left,
-                  //     // ),
-                  //     onChanged: (String? value) {
-                  //       setState(() {
-                  //         _selectedOption = value;
-                  //       });
-                  //     },
-                  //     items: <String>['Goat', 'Standard', 'Premium']
-                  //         .map<DropdownMenuItem<String>>((String value) {
-                  //       return DropdownMenuItem<String>(
-                  //         value: value,
-                  //         child: Text(value),
-                  //       );
-                  //     }).toList(),
-                  //   ),
-                  // ),
+                  ),
                 ),
                 Card(
                   shape: RoundedRectangleBorder(
