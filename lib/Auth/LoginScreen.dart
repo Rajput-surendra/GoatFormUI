@@ -28,8 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController mobileController =  TextEditingController();
   TextEditingController passwordController =  TextEditingController();
 
-
-
   Future<void> login() async {
     setState(() {
       isLoading = true;
@@ -39,8 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
       "password":passwordController.text,
 
     };
-    print('____parameter______${parameter}_________');
-
     apiBaseHelper.postAPICall(Uri.parse(ApiService.login), parameter).then((getData) async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool error = getData['error'];
@@ -56,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setString('image', uImage);
         setState(() {
           Fluttertoast.showToast(msg: "${getData['message']}");
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MadhuFarmScreen()));
         });
 
       }

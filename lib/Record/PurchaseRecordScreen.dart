@@ -1,7 +1,13 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import '../../Helper/Appbar.dart';
+import '../ApiPath/Api.dart';
 import '../Helper/Colors.dart';
 import '../Helper/session.dart';
+import '../Model/animal_cat_model_response.dart';
+import '../Model/purchase_record_model.dart';
 import '../Screens/NewPurchase.dart';
 
 class PurchaseRecord extends StatefulWidget {
@@ -13,11 +19,16 @@ class PurchaseRecord extends StatefulWidget {
 
 class _PurchaseRecordState extends State<PurchaseRecord> {
   String dropdownValue = 'MF005';
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    animalCatApi();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF2F2F2),
+      backgroundColor: colors.grad1Color,
       appBar: customAppBar(
         context: context,
         text:getTranslated(context, "PURCHASE_RECORD"),
@@ -25,12 +36,9 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
-        // padding: EdgeInsets.symmetric(
-        //     horizontal: MediaQuery.of(context).size.width * 0.2),
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 15),
           child: Column(
-            //mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
@@ -40,99 +48,147 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
               SizedBox(
                 height: 5,
               ),
-              Card(
-                color: Colors.white,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  height: 50,
-                  color: Colors.white,
-                  width: MediaQuery.of(context).size.width,
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    underline: Container(),
-                    value: dropdownValue,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        dropdownValue = newValue!;
-                      });
-                    },
-                    items: <String>['MF005', 'MF006']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+              Container(
+                width: double.infinity,
+                child: Card(
+
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2<AnimalCatList>(
+                        hint:  Text(getTranslated(context, "SELECT_CATE"),
+                          style: TextStyle(
+                              color: colors.black54,fontWeight: FontWeight.w500,fontSize:15
+                          ),),
+                        value: animalCat,
+                        icon:  Icon(Icons.keyboard_arrow_down_rounded,  color:colors.secondary,size: 30,),
+                        style:  const TextStyle(color: colors.secondary,fontWeight: FontWeight.bold),
+                        underline: Padding(
+                          padding: const EdgeInsets.only(left: 0,right: 0),
+                          child: Container(
+
+                            // height: 2,
+                            color:  colors.whiteTemp,
+                          ),
+                        ),
+                        onChanged: (AnimalCatList? value) {
+                          setState(() {
+                            animalCat = value!;
+                            catId =  animalCat?.id;
+                            animalCountApi(animalCat!.id);
+                          });
+                        },
+                        items: animalCatResponse?.data?.map((items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child:  Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Container(
+
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 0),
+                                        child: Text(items.name.toString(),overflow:TextOverflow.ellipsis,style: const TextStyle(color:colors.black54),),
+                                      )),
+                                ),
+
+                              ],
+                            ),
+                          );
+                        })
+                            .toList(),
+                      ),
+
+                    ),
                   ),
                 ),
               ),
               SizedBox(
                 height: 10,
               ),
-              Card(
+            purchaseRecordModel?.data == null  || purchaseRecordModel?.data == ""? Center(child: Text("Data Not Found !"))
+                  :   SingleChildScrollView(
                 child: Container(
-                    child: ListTile(
-                      contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                      tileColor: Colors.white,
-                      title: Text(
-                        '${getTranslated(context, "PARTY_NAME")} : Antara Medical',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      subtitle: Text(
-                        '${getTranslated(context, "MATERIAL")} : PPR Vaccine',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      trailing: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${getTranslated(context, "DATE")} : 16/08/2023",
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          Text(
-                            "${getTranslated(context, "QTY")} : 10 ${getTranslated(context, "ML")}",
-                            style: TextStyle(fontSize: 12, color: Colors.black),
-                          )
-                        ],
-                      ),
-                    )),
-              ),
+                  height: MediaQuery.of(context).size.height/1.4,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: AlwaysScrollableScrollPhysics(),
+                    itemCount: purchaseRecordModel?.data?.length,
 
-              SizedBox(
-                height: 10,
-              ),
-              Card(
-                child: Container(
-                    child: ListTile(
-                      contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                      tileColor: Colors.white,
-                      title: Text(
-                        '${getTranslated(context, "PARTY_NAME")} : Arun Pawar',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      subtitle: Text(
-                          '${getTranslated(context, "MATERIAL")} : Makka',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      trailing: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${getTranslated(context, "DATE")} : 16/08/2023",
-                            style: TextStyle(fontSize: 12),
+                      itemBuilder: (context,i){
+                        return  Card(
+                          child: Container(
+                            height: 80,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text('${getTranslated(context, "PARTY_NAME")}'),
+                                            Text(":"),
+                                            SizedBox(width: 2,),
+                                           Text("${purchaseRecordModel?.data?[i].partyName}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text('${getTranslated(context, "MATERIAL")}'),
+                                            Text(":"),
+                                            SizedBox(width: 2,),
+                                            Container(
+                                              width: 120,
+                                                child: Text("${purchaseRecordModel?.data?[i].materialDesc}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,maxLines: 1,))
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text('${getTranslated(context, "DATE")}'),
+                                            Text(":"),
+                                            SizedBox(width: 2,),
+                                            Text("${purchaseRecordModel?.data?[i].date}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                          ],
+                                        ),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text('${getTranslated(context, "QTY")}'),
+                                            Text(":"),
+                                            SizedBox(width: 2,),
+                                            Text("${purchaseRecordModel?.data?[i].qty}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                          ],
+                                        ),
+
+                                      ],
+                                    ),
+
+                                  ],
+                                ),
+                              )
+
                           ),
-                          Text(
-                            "${getTranslated(context, "QTY")} : 100 ${getTranslated(context, "ML")}",
-                            style: TextStyle(fontSize: 12, color: Colors.black),
-                          )
-                        ],
-                      ),
-                    )),
-              ),
+                        );
+
+                  }),
+                ),
+              )
+
+
+
             ],
           ),
         ),
@@ -146,5 +202,45 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+  String? catId;
+  AnimalCatList? animalCat;
+  AnimalCatResponse? animalCatResponse;
+  Future<void> animalCatApi() async {
+    apiBaseHelper.getAPICall(Uri.parse(ApiService.animalCategory)).then((getData) {
+      bool error = getData ['error'];
+      if(!error){
+        animalCatResponse = AnimalCatResponse.fromJson(getData);
+        setState(() {
+
+        });
+      }else {
+
+      }
+
+    });
+
+  }
+
+
+  PurchaseRecordModel? purchaseRecordModel;
+  animalCountApi(String? catId) async {
+    var parameter = {
+      "category":catId,
+    };
+    apiBaseHelper.postAPICall(Uri.parse(ApiService.purchaseList), parameter).then((getData) {
+      bool error = getData['error'];
+      String msg = getData['message'];
+      if (error ==  false) {
+        setState(() {
+          purchaseRecordModel = PurchaseRecordModel.fromJson(getData);
+          Fluttertoast.showToast(msg: "${msg}");
+        });
+      }else {
+        purchaseRecordModel = PurchaseRecordModel();
+        Fluttertoast.showToast(msg: "${msg}");
+        setState(() {});
+      }
+    });
   }
 }

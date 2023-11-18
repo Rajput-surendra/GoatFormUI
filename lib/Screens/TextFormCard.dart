@@ -5,13 +5,17 @@ import '../Helper/session.dart';
 import '../Utils/Colors.dart';
 
 class TextFormCard extends StatefulWidget {
-   TextFormCard({Key? key, required this.name, required this.width,this.hint, this.Icon, this.controller, this.validString}) : super(key: key);
+   TextFormCard({Key? key, required this.name, required this.width,this.hint, this.Icon, this.controller, this.validString,this.onTap,this.readOnly,this.textInputType}) : super(key: key);
   final String name;
   final double width;
   final String? hint;
   IconData? Icon;
   final TextEditingController? controller;
   final String? validString;
+   VoidCallback? onTap;
+   bool? readOnly;
+   TextInputType ? textInputType;
+
 
   @override
   State<TextFormCard> createState() => _TextFormCardState();
@@ -35,7 +39,7 @@ class _TextFormCardState extends State<TextFormCard> {
         ),
         SizedBox(height: 5,),
         Card(
-          elevation: 1,
+          elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
           ),
@@ -44,6 +48,8 @@ class _TextFormCardState extends State<TextFormCard> {
               color: Colors.white,
               alignment: Alignment.center,
               child:TextFormField(
+                onTap:widget.onTap,
+                readOnly: widget.readOnly ?? false,
                 // maxLines: 4,
                 controller: widget.controller,
                 cursorHeight: 25,
@@ -88,7 +94,7 @@ class _TextFormCardState extends State<TextFormCard> {
         ),
         SizedBox(height: 5,),
         Card(
-          elevation: 1,
+          elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
           ),
@@ -97,8 +103,11 @@ class _TextFormCardState extends State<TextFormCard> {
               color: Colors.white,
               alignment: Alignment.center,
               child:TextFormField(
+                onTap:widget.onTap,
+                readOnly: widget.readOnly ?? false,
                 // maxLines: 4,
                 controller: widget.controller,
+                keyboardType: widget.textInputType,
                 cursorHeight: 25,
                 textAlign: TextAlign.start,
                 decoration: InputDecoration(

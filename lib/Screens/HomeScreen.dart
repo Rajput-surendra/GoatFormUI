@@ -136,19 +136,11 @@ List<String> moduleList = [];
       if (error ==  false) {
 
         userModuleDataList = (getData['data'] as List).map((e) => UserModuleData.fromJson(e)).toList() ;
-        for(int i=0; i<userModuleDataList.length; i++){
-          moduleList.add(userModuleDataList[i].module ?? '') ;
-        }
-
-
-        // String Status =  getData['data'][0]['Status'];
-        // String Breead =  getData['data'][0]['Breead'];
-        // String Animals =  getData['data'][0]['Animals'];
-
-        // setState(() {
-        //   Fluttertoast.showToast(msg: "${getData['message']}");
-        //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-        // });
+        setState(() {
+          for(int i=0; i<userModuleDataList.length; i++){
+            moduleList.add(userModuleDataList[i].module ?? '') ;
+          }
+        });
 
       }
 
@@ -158,6 +150,7 @@ List<String> moduleList = [];
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: colors.grad1Color,
       body: SingleChildScrollView(
         child: SizedBox(
           child: Stack(

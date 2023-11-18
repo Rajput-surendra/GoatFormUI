@@ -54,6 +54,7 @@ extension colors on ColorScheme {
   static const Color blacktextColor = Color(0xff8F8F8F);
 
 
+
   static const Color transparent = Color(0xFFFBFBFB);
   static const Color darkBlue = Color(0xFF00008b);
   static const Color lightBlue = Color(0xFFADD8E6);
