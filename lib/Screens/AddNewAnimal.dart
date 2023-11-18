@@ -7,9 +7,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 
+import '../ApiPath/Api.dart';
 import '../Helper/AppBtn.dart';
 import '../Helper/CustomText.dart';
 import '../Helper/session.dart';
+import '../Model/animal_cat_model_response.dart';
+import '../Model/breed_list_model.dart';
 import '../Record/AnimalRecord.dart';
 import '../Utils/Colors.dart';
 import '../helper/appbar.dart';
@@ -82,7 +85,13 @@ class _AddNewAnimalState extends State<AddNewAnimal> {
     }
   }
 
-
+   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    animalCatApi();
+    breedListApi();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,92 +109,153 @@ class _AddNewAnimalState extends State<AddNewAnimal> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Custom_Text(text: '${getTranslated(context, "CATEGORIES")}'),
-                      SizedBox(height: 8,),
-                      Container(
-                        width: MediaQuery.of(context).size.width/2.3,
-                        color: Colors.white,
-                        child: DropdownButton2<String>(
-                          isExpanded: true,
-                          value:userType,
-                          //elevation: 5,
-                          style: TextStyle(color: Colors.black87),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Custom_Text(text: '${getTranslated(context, "CATEGORIES")}'),
+                        SizedBox(height: 8,),
+                        Container(
+                          height: 60,
+                          width: 160,
+                          child: Card(
+                            // shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(5)
+                            // ),
+                            //margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton2<AnimalCatList>(
+                                  hint:  Text(getTranslated(context, "SELECT_CATE"),
+                                    style: TextStyle(
+                                        color: colors.black54,fontWeight: FontWeight.w500,fontSize:12
+                                    ),),
+                                  value: animalCat,
+                                  icon:  Icon(Icons.keyboard_arrow_down_rounded,  color:colors.secondary,size: 30,),
+                                  style:  const TextStyle(color: colors.secondary,fontWeight: FontWeight.bold),
+                                  underline: Padding(
+                                    padding: const EdgeInsets.only(left: 0,right: 0),
+                                    child: Container(
 
-                          items: <String>[
-                            'Cows',
-                            'Chickens',
-                            'Pigs',
-                            'Goat',
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          icon: Icon(Icons.keyboard_arrow_down),
-                          hint: Text(
-                            "Select Category",
-                          ),
-                          onChanged: (String? value)  {
-                            setState(() {
-                              userType = value!;
-                            });
-                          },
+                                      // height: 2,
+                                      color:  colors.whiteTemp,
+                                    ),
+                                  ),
+                                  onChanged: (AnimalCatList? value) {
+                                    setState(() {
+                                      animalCat = value!;
+                                      catId =  animalCat?.id;
 
-                          underline: Container(  // Use a container with zero height to remove the underline
-                            height: 0,
-                            color: Colors.white,
+                                      //animalCountApi(animalCat!.id);
+                                    });
+                                  },
+                                  items: animalCatResponse?.data?.map((items) {
+                                    return DropdownMenuItem(
+                                      value: items,
+                                      child:  Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 2),
+                                            child: Container(
+
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(top: 0),
+                                                  child: Text(items.name.toString(),overflow:TextOverflow.ellipsis,style: const TextStyle(color:colors.black54),),
+                                                )),
+                                          ),
+
+                                        ],
+                                      ),
+                                    );
+                                  })
+                                      .toList(),
+                                ),
+
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 5,),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Custom_Text(text: '${getTranslated(context, "BREED")}'),
-                      SizedBox(height: 8,),
-                      Container(
-                        width: MediaQuery.of(context).size.width/2.3,
-                        color: Colors.white,
-                        child: DropdownButton2<String>(
-                          isExpanded: true,
-                          value:breed,
-                          //elevation: 5,
-                          style: TextStyle(color: Colors.black87),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Custom_Text(text: '${getTranslated(context, "BREED")}'),
+                        SizedBox(height: 8,),
+                        Container(
+                          width: 160,
+                          height: 60,
+                          child: Card(
+                            // shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(5)
+                            // ),
+                            //margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton2<BreedDataList>(
+                                  hint:  Text(getTranslated(context, "BREED"),
+                                    style: TextStyle(
+                                        color: colors.black54,fontWeight: FontWeight.w500,fontSize:12
+                                    ),),
+                                  value: animalBreed,
+                                  icon:  Icon(Icons.keyboard_arrow_down_rounded,  color:colors.secondary,size: 30,),
+                                  style:  const TextStyle(color: colors.secondary,fontWeight: FontWeight.bold),
+                                  underline: Padding(
+                                    padding: const EdgeInsets.only(left: 0,right: 0),
+                                    child: Container(
 
-                          items: <String>[
-                            'Holstein',
-                            'sahiwal',
-                            'hariana',
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          icon: Icon(Icons.keyboard_arrow_down),
-                          hint: Text(
-                            "${getTranslated(context, "SELECT_BREED")}",
-                          ),
-                          onChanged: (String? value)  {
-                            setState(() {
-                              breed = value!;
-                            });
-                          },
+                                      // height: 2,
+                                      color:  colors.whiteTemp,
+                                    ),
+                                  ),
+                                  onChanged: (BreedDataList? value) {
+                                    setState(() {
+                                      animalBreed = value!;
+                                      catId =  animalBreed?.id;
 
-                          underline: Container(  // Use a container with zero height to remove the underline
-                            height: 0,
-                            color: Colors.white,
+                                      //animalCountApi(animalCat!.id);
+                                    });
+                                  },
+                                  items: breedListModel?.data?.map((items) {
+                                    return DropdownMenuItem(
+                                      value: items,
+                                      child:  Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 2),
+                                            child: Container(
+
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(top: 0),
+                                                  child: Text(items.name.toString(),overflow:TextOverflow.ellipsis,style: const TextStyle(color:colors.black54),),
+                                                )),
+                                          ),
+
+                                        ],
+                                      ),
+                                    );
+                                  })
+                                      .toList(),
+                                ),
+
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -264,7 +334,7 @@ class _AddNewAnimalState extends State<AddNewAnimal> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Custom_Text(text: '${getTranslated(context, "GENDER")}'),
+                  Custom_Text(text: '${getTranslated(context, "PROCUREMENT")}'),
                   SizedBox(height: 8,),
                   Container(
                     // width: MediaQuery.of(context).size.width/2.3,
@@ -710,5 +780,44 @@ class _AddNewAnimalState extends State<AddNewAnimal> {
         ),
       ),
     );
+  }
+
+  String? catId;
+  AnimalCatList? animalCat;
+  AnimalCatResponse? animalCatResponse;
+  Future<void> animalCatApi() async {
+    apiBaseHelper.getAPICall(Uri.parse(ApiService.animalCategory)).then((getData) {
+      bool error = getData ['error'];
+      if(!error){
+        animalCatResponse = AnimalCatResponse.fromJson(getData);
+        setState(() {
+
+        });
+      }else {
+
+      }
+
+    });
+
+  }
+
+
+  String? breedId;
+  BreedDataList? animalBreed;
+  BreedListModel? breedListModel;
+  Future<void> breedListApi() async {
+    apiBaseHelper.getAPICall(Uri.parse(ApiService.breedList)).then((getData) {
+      bool error = getData ['error'];
+      if(!error){
+        breedListModel = BreedListModel.fromJson(getData);
+        setState(() {
+
+        });
+      }else {
+
+      }
+
+    });
+
   }
 }
