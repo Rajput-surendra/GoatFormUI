@@ -14,6 +14,8 @@ class ApiService {
   static const String purchaseList = baseUrl+'purchase_list';
   static const String addBreed = baseUrl+'add_breed';
   static const String breedList = baseUrl+'breed_list';
+  static const String addAnimal = baseUrl+'add_animal';
+  static const String animalList = baseUrl+'animal_list';
 }
 
 

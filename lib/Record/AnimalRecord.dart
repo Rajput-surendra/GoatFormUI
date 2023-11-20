@@ -1,16 +1,21 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 
 import '../../Helper/Appbar.dart';
 import '../../Helper/CustomCard.dart';
 import '../../Utils/Colors.dart';
+import '../ApiPath/Api.dart';
 import '../Helper/session.dart';
+import '../Model/animal_list_model.dart';
+import '../Scanner/scanner_view.dart';
 import '../Screens/AddNewAnimal.dart';
 
 class AnimalRecord extends StatefulWidget {
-  const AnimalRecord({Key? key}) : super(key: key);
-
+   AnimalRecord({Key? key,this.taqId}) : super(key: key);
+   String? taqId;
   @override
   State<AnimalRecord> createState() => _AnimalRecordState();
 }
@@ -22,12 +27,37 @@ class _AnimalRecordState extends State<AnimalRecord> {
     currentindex1 = true;
     pageChange = 1;
     super.initState();
+    animalListApi("","all");
+    tgC.text =  widget.taqId.toString();
+
+  }
+  AnimalListModel? animalListModel;
+  animalListApi(String? tagId,filter) async {
+    var parameter = {
+       "tag_id":tagId,
+      "filter":tagId == ""?filter :""
+    };
+    print('_____parameter_____${parameter}_________');
+    apiBaseHelper.postAPICall(Uri.parse(ApiService.animalList), parameter).then((getData) {
+      bool error = getData['error'];
+      String msg = getData['message'];
+      if (error ==  false) {
+        setState(() {
+          animalListModel = AnimalListModel.fromJson(getData);
+          Fluttertoast.showToast(msg: "${msg}");
+        });
+      }else {
+        animalListModel = AnimalListModel();
+        Fluttertoast.showToast(msg: "${msg}");
+        setState(() {});
+      }
+    });
   }
 
+
+
   String? breedValue;
-
   final List<String> breedValueitems = ['Goat', 'Standard', 'Premium'];
-
   bool currentindex1 = false;
   bool currentindex2 = false;
   bool currentindex3 = false;
@@ -37,6 +67,7 @@ class _AnimalRecordState extends State<AnimalRecord> {
   bool currentindex7 = false;
 
   var pageChange;
+  TextEditingController  tgC =  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +76,17 @@ class _AnimalRecordState extends State<AnimalRecord> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
            Navigator.push(context, MaterialPageRoute(builder: (context)=>AddNewAnimal()));
-
-          // Action to perform when the button is pressed.
-          // For example, navigate to a new screen or show a dialog.
         },
         child: Icon(Icons.add),
         backgroundColor: colors.darkBlue,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
-      appBar: customAppBar(
-        context: context,
-        text: "${getTranslated(context, "ANIMAL_RECORD")}",
-        isTrue: true,
-      ),
+      // appBar: customAppBar(
+      //   context: context,
+      //   text: "${getTranslated(context, "ANIMAL_RECORD")}",
+      //   isTrue: true,
+      // ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(14.0),
@@ -84,20 +112,30 @@ class _AnimalRecordState extends State<AnimalRecord> {
                     height: 55,
                     child: Center(
                       child: TextFormField(
-                        // controller: supplementController,
+                        controller: tgC,
                         decoration: InputDecoration(
                             suffixIcon: Container(
                               padding: EdgeInsets.all(10),
-                              child: Image.asset("assets/images/Group 72309.png"),
+                              child: InkWell(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ScanPay())).then((value){
+                                      if(value != null){
+                                        print('______value____${value}_________');
+                                        animalListApi(value ,"");
+
+                                      }
+                                    });;
+                                  },
+                                  child: Image.asset("assets/images/Group 72309.png")),
                             ),
-                            contentPadding: EdgeInsets.only(left: 10),
+                            contentPadding: EdgeInsets.only(left: 10,top: 20),
                             border: InputBorder.none),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please Enter 2nd onwards';
-                          }
-                          return null;
-                        },
+                        // validator: (value) {
+                        //   if (value == null || value.isEmpty) {
+                        //     return 'Please Enter 2nd onwards';
+                        //   }
+                        //   return null;
+                        // },
                       ),
                     ),
                   ),
@@ -120,13 +158,14 @@ class _AnimalRecordState extends State<AnimalRecord> {
                   child: Column(
                     children: [
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Row(
                         children: [
                           InkWell(
                             onTap: () {
                               setState(() {
+                                animalListApi("","all");
                                 currentindex1 = true;
                                 pageChange = 1;
                                 if (currentindex1 == true) {
@@ -146,7 +185,9 @@ class _AnimalRecordState extends State<AnimalRecord> {
                           ),
                           InkWell(
                             onTap: () {
+
                               setState(() {
+                                animalListApi("","male");
                                 currentindex2 = true;
                                 pageChange = 2;
                                 if (currentindex2 == true) {
@@ -167,6 +208,7 @@ class _AnimalRecordState extends State<AnimalRecord> {
                           InkWell(
                             onTap: () {
                               setState(() {
+                                animalListApi("","female");
                                 currentindex3 = true;
                                 pageChange = 3;
                                 if (currentindex3 == true) {
@@ -187,6 +229,7 @@ class _AnimalRecordState extends State<AnimalRecord> {
                           InkWell(
                             onTap: () {
                               setState(() {
+                                animalListApi("","kids");
                                 currentindex4 = true;
                                 pageChange = 4;
                                 if (currentindex4 == true) {
@@ -211,6 +254,7 @@ class _AnimalRecordState extends State<AnimalRecord> {
                           InkWell(
                             onTap: () {
                               setState(() {
+                                animalListApi("","pregnant");
                                 currentindex5 = true;
                                 pageChange = 5;
                                 if (currentindex5 == true) {
@@ -231,6 +275,7 @@ class _AnimalRecordState extends State<AnimalRecord> {
                           InkWell(
                             onTap: () {
                               setState(() {
+                                animalListApi("","matted");
                                 currentindex6 = true;
                                 pageChange = 6;
                                 if (currentindex6 == true) {
@@ -248,111 +293,226 @@ class _AnimalRecordState extends State<AnimalRecord> {
                               currentindex: currentindex6,
                             ),
                           ),
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                currentindex7 = !currentindex7;
-                                pageChange = 7;
-                                if (currentindex7 == true) {
-                                  currentindex2 = false;
-                                  currentindex3 = false;
-                                  currentindex4 = false;
-                                  currentindex5 = false;
-                                  currentindex6 = false;
-                                  currentindex1 = false;
-                                }
-                              });
-                            },
-                            child: CustomCard3(
-                              title: '${getTranslated(context, "EMPTY")}',
-                              currentindex: currentindex7,
-                            ),
-                          ),
+
+                          // InkWell(
+                          //   onTap: () {
+                          //     setState(() {
+                          //       currentindex6 = true;
+                          //       pageChange = 6;
+                          //       if (currentindex6 == true) {
+                          //         currentindex2 = false;
+                          //         currentindex3 = false;
+                          //         currentindex4 = false;
+                          //         currentindex5 = false;
+                          //         currentindex1 = false;
+                          //         currentindex7 = false;
+                          //       }
+                          //     });
+                          //   },
+                          //   child: CustomCard3(
+                          //     title: '${getTranslated(context, "MATTED")}',
+                          //     currentindex: currentindex6,
+                          //   ),
+                          // ),
+
                         ],
                       ),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
-                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${getTranslated(context, "TOTAL_ANIMAL")}: 05",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: colors.darkBlue),
-                          ),
-                          Text(
-                            "${getTranslated(context, "TOTAL_WEIGHT")}: 137 kg",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: colors.darkBlue),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      pageChange == 1
-                          ? Container(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              CustomCard4(
-                                  name1: "${getTranslated(context, "TAG_ID")}: F001",
-                                  name2: "${getTranslated(context, "AGE")}:12",
-                                  name3: "${getTranslated(context, "FEMALE")}",
-                                  name4: "Osmanabad",
-                                  name5: "${getTranslated(context, "WEIGHT")}:48",
-                                  name6: "${getTranslated(context, "STATUS")}:Empty"),
-                              CustomCard4(
-                                  name1: "${getTranslated(context, "TAG_ID")}: F002",
-                                  name2: "${getTranslated(context, "AGE")}:9",
-                                  name3: "${getTranslated(context, "FEMALE")}",
-                                  name4: "Osmanabad",
-                                  name5: "${getTranslated(context, "WEIGHT")}:35",
-                                  name6: "${getTranslated(context, "STATUS")}:Pregnant"),
-                              CustomCard4(
-                                  name1: "${getTranslated(context, "TAG_ID")}: F003",
-                                  name2: "${getTranslated(context, "AGE")}:7",
-                                  name3: "${getTranslated(context, "MALE")}",
-                                  name4: "Osmanabad",
-                                  name5: "${getTranslated(context, "WEIGHT")}:27",
-                                  name6: "${getTranslated(context, "STATUS")}:Breeder"),
-                              CustomCard4(
-                                  name1: "${getTranslated(context, "TAG_ID")}: F004",
-                                  name2: "${getTranslated(context, "AGE")}:6",
-                                  name3: "${getTranslated(context, "PREGNANT")}",
-                                  name4: "Osmanabad",
-                                  name5: "${getTranslated(context, "WEIGHT")}:15",
-                                  name6: "${getTranslated(context, "STATUS")}:Empty"),
-                              CustomCard4(
-                                  name1: "${getTranslated(context, "TAG_ID")}: F005",
-                                  name2: "${getTranslated(context, "AGE")}:4",
-                                  name3: "${getTranslated(context, "MALE")}",
-                                  name4: "Osmanabad",
-                                  name5: "${getTranslated(context, "WEIGHT")}:12",
-                                  name6: "${getTranslated(context, "STATUS")}:Empty"),
-                            ],
-                          ),
-                        ),
-                      )
-                          : Container(),
-                      pageChange == 2 ? Text("Page 2") : Container(),
-                      pageChange == 3 ? Text("Page 3") : Container(),
-                      pageChange == 4 ? Text("Page 4") : Container(),
-                      pageChange == 5 ? Text("Page 5") : Container(),
-                      pageChange == 6 ? Text("Page 6") : Container(),
-                      pageChange == 7 ? Text("Page 7") : Container(),
+
+
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${getTranslated(context, "TOTAL_ANIMAL")}: 05",
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colors.darkBlue),
+                  ),
+                  Text(
+                    "${getTranslated(context, "TOTAL_WEIGHT")}: 137 kg",
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colors.darkBlue),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                height: 500,
+                child: ListView.builder(
+                    itemCount: animalListModel?.data?.length,
+                    itemBuilder: (c,i){
+                      return  Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Tag ID:"),
+                                      Text("${animalListModel?.data?[i].tagId}")
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Age:"),
+                                      Text("${animalListModel?.data?[i].age}")
+                                    ],
+                                  ),
+
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        child: Text("Weight"),
+                                      ),
+                                      Text("${animalListModel?.data?[i].weight}")
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        child: Text("Weight"),
+                                      ),
+                                      Text("${animalListModel?.data?[i].weight}")
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("${animalListModel?.data?[i].procurement}")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text("${animalListModel?.data?[i].ifMale}"),
+                                    ],
+                                  ),
+
+
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+              pageChange == 1
+                  ? Container(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      CustomCard4(
+                          name1: "${getTranslated(context, "TAG_ID")}: F001",
+                          name2: "${getTranslated(context, "AGE")}:12",
+                          name3: "${getTranslated(context, "FEMALE")}",
+                          name4: "Osmanabad",
+                          name5: "${getTranslated(context, "WEIGHT")}:48",
+                          name6: "${getTranslated(context, "STATUS")}:Empty"),
+
+                    ],
+                  ),
+                ),
+              )
+                  : Container(),
+              pageChange == 2 ? Text("Page 2") : Container(),
+              pageChange == 3 ? Text("Page 3") : Container(),
+              pageChange == 4 ? Text("Page 4") : Container(),
+              pageChange == 5 ? Text("Page 5") : Container(),
+              pageChange == 6 ? Text("Page 6") : Container(),
+              pageChange == 7 ? Text("Page 7") : Container(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  int _currentIndex = 1 ;
+  allAnimalCard(){
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: (){
+                setState(() {
+                  _currentIndex = 1;
+                  // getNewListApi(1);
+
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    color: _currentIndex == 1 ?
+                    colors.primary
+                        : colors.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                height: 45,
+                child: Center(
+                  child: Text("Event",style: TextStyle(color: _currentIndex == 1 ?colors.whiteTemp:colors.blackTemp,fontSize: 18)),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5,),
+          Expanded(
+            child: InkWell(
+              onTap: (){
+                setState(() {
+                  _currentIndex = 2;
+                  // getNewListApi(3);
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    color: _currentIndex == 2 ?
+                    colors.primary
+                        : colors.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                // width: 120,
+                height: 45,
+                child: Center(
+                  child: Text("Online Webinars",style: TextStyle(color: _currentIndex == 2 ?colors.whiteTemp:colors.blackTemp,fontSize: 18),),
+                ),
+              ),
+            ),
+          ),
+
+        ],
       ),
     );
   }

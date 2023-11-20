@@ -36,7 +36,7 @@ class _BreedScreenState extends State<BreedScreen> {
           breedListApi();
         },);
       },
-          child: ListView.builder(
+          child: breedListModel == null || breedListModel == "" ? Center(child: CircularProgressIndicator()):ListView.builder(
             itemCount: 1,
               itemBuilder: (context,i){
             return Container(
@@ -52,7 +52,7 @@ class _BreedScreenState extends State<BreedScreen> {
                     crossAxisSpacing: 8.0, // spacing between columns
                   ),
 
-                  itemCount:breedListModel?.data?.length ,// total number of items
+                  itemCount:breedListModel!.data!.length ,// total number of items
                   itemBuilder: (context, index) {
                     return Container(
                       child: Card(
@@ -64,25 +64,25 @@ class _BreedScreenState extends State<BreedScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              breedListModel?.data?[index].image  ==  null || breedListModel?.data?[index].image == "" ? Container(
+                              breedListModel!.data![index].image  ==  null || breedListModel!.data![index].image == "" ? Container(
                                   height: 120,
                                   child: Image.asset("assets/image/img.png")): Container(
                                 height: 120,
                                 width: double.infinity,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: Image.network("${breedListModel?.data?[index].image}",
+                                  child: Image.network("${breedListModel!.data![index].image}",
                                     fit: BoxFit.fill,
                                   ),
                                 ),
 
                               ),
                               SizedBox(height: 5,),
-                              Text("${breedListModel?.data?[index].name}",style: TextStyle(
+                              Text("${breedListModel!.data![index].name}",style: TextStyle(
                                   fontWeight: FontWeight.bold
                               ),),
                               SizedBox(height: 3,),
-                              Text('${breedListModel?.data?[index].parent}',style: TextStyle(
+                              Text('${breedListModel!.data![index].parent}',style: TextStyle(
                                   color:colors.black12.withOpacity(0.5)
                               ),),
 

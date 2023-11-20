@@ -460,7 +460,7 @@ List<String> moduleList = [];
                   ),
                 ],
               ),
-              Positioned(
+              uImage == null ?Center(child: CircularProgressIndicator()):Positioned(
                 // width: size.width/4.2,
                 // height: size.height/10.2,
                 top: 100,
@@ -535,14 +535,6 @@ List<String> moduleList = [];
                           );
                         },
                       ),
-                      // Padding(
-                      //   padding: const EdgeInsets.only(right:15.0),
-                      //   child: Align(
-                      //       alignment: Alignment.bottomRight,
-                      //       child: ElevatedButton(onPressed: (){
-                      //         Navigator.push(context,MaterialPageRoute(builder: (context)=>SignInScreen()));
-                      //       },style: ElevatedButton.styleFrom(backgroundColor:Color(0xFF3700b3) ), child:Icon(Icons.arrow_forward))),
-                      // )
                     ],
                   ),
                 ),

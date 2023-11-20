@@ -110,14 +110,14 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
               SizedBox(
                 height: 10,
               ),
-            purchaseRecordModel?.data == null  || purchaseRecordModel?.data == ""? Center(child: Text("Data Not Found !"))
+              animalCatResponse == null ? Center(child: CircularProgressIndicator()) :  purchaseRecordModel?.data?.isEmpty ?? true? Center(child: Text("Data Not Found !"))
                   :   SingleChildScrollView(
                 child: Container(
                   height: MediaQuery.of(context).size.height/1.4,
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: AlwaysScrollableScrollPhysics(),
-                    itemCount: purchaseRecordModel?.data?.length,
+                    itemCount: purchaseRecordModel!.data!.length,
 
                       itemBuilder: (context,i){
                         return  Card(
@@ -136,7 +136,7 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
                                             Text('${getTranslated(context, "PARTY_NAME")}'),
                                             Text(":"),
                                             SizedBox(width: 2,),
-                                           Text("${purchaseRecordModel?.data?[i].partyName}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                           Text("${purchaseRecordModel!.data?[i].partyName}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
                                           ],
                                         ),
                                         Row(
@@ -146,7 +146,7 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
                                             SizedBox(width: 2,),
                                             Container(
                                               width: 120,
-                                                child: Text("${purchaseRecordModel?.data?[i].materialDesc}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,maxLines: 1,))
+                                                child: Text("${purchaseRecordModel!.data?[i].materialDesc}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,maxLines: 1,))
                                           ],
                                         ),
                                       ],
@@ -160,7 +160,7 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
                                             Text('${getTranslated(context, "DATE")}'),
                                             Text(":"),
                                             SizedBox(width: 2,),
-                                            Text("${purchaseRecordModel?.data?[i].date}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                            Text("${purchaseRecordModel!.data?[i].date}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
                                           ],
                                         ),
                                         Row(
@@ -169,7 +169,7 @@ class _PurchaseRecordState extends State<PurchaseRecord> {
                                             Text('${getTranslated(context, "QTY")}'),
                                             Text(":"),
                                             SizedBox(width: 2,),
-                                            Text("${purchaseRecordModel?.data?[i].qty}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
+                                            Text("${purchaseRecordModel!.data?[i].qty}",style: TextStyle(color: colors.blackTemp,fontWeight: FontWeight.bold),)
                                           ],
                                         ),
 
